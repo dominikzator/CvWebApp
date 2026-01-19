@@ -14,20 +14,19 @@ namespace CvWebApp.Pages
 
         public void OnGet()
         {
-            if (User.Identity.IsAuthenticated)
-            {
-                _logger.LogInformation("U¿ytkownik zalogowany: {UserName}", User.Identity.Name);
+            var isAuth = User.Identity.IsAuthenticated;
+            var name = User.Identity.Name;
 
-                // Wszystkie claims
-                foreach (var claim in User.Claims)
-                {
-                    _logger.LogInformation("Claim: {Type} = {Value}", claim.Type, claim.Value);
-                }
-            }
-            else
+            // Logi do Azure Log Stream
+            Console.WriteLine($"IsAuthenticated: {isAuth}");
+            Console.WriteLine($"Name: {name}");
+            Console.WriteLine($"Claims count: {User.Claims.Count()}");
+
+            foreach (var claim in User.Claims)
             {
-                _logger.LogInformation("Brak zalogowanego u¿ytkownika");
+                Console.WriteLine($"Claim: {claim.Type} = {claim.Value}");
             }
         }
+
     }
 }

@@ -1,30 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-//using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
-//using Microsoft.Identity.Web;
-//using Microsoft.AspNetCore.Authentication.Google;
-//using Microsoft.Identity.Web.UI;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-/*builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));*/
-/*    .AddGoogle(options =>                                    // ← DODAJ TUTAJ
-    {
-        options.ClientId = builder.Configuration["Google:ClientId"];
-        options.ClientSecret = builder.Configuration["Google:ClientSecret"];
-        options.CallbackPath = "/signin-google";             // Pasuje do redirect URI w Google
-    });*/
-
-/*builder.Services.AddAuthorization(options =>
-{
-    // By default, all incoming requests will be authorized according to the default policy.
-    options.FallbackPolicy = options.DefaultPolicy;
-});*/
 builder.Services.AddRazorPages();
-    //.AddMicrosoftIdentityUI();
 
 var app = builder.Build();
 
@@ -40,9 +19,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
-
-//app.UseAuthentication();
 
 app.UseAuthorization();
 

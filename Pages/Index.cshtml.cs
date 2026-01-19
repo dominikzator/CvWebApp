@@ -14,7 +14,20 @@ namespace CvWebApp.Pages
 
         public void OnGet()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                _logger.LogInformation("U¿ytkownik zalogowany: {UserName}", User.Identity.Name);
 
+                // Wszystkie claims
+                foreach (var claim in User.Claims)
+                {
+                    _logger.LogInformation("Claim: {Type} = {Value}", claim.Type, claim.Value);
+                }
+            }
+            else
+            {
+                _logger.LogInformation("Brak zalogowanego u¿ytkownika");
+            }
         }
     }
 }

@@ -24,9 +24,6 @@ namespace CvWebApp.Pages
 
         public async Task OnGet()
         {
-            var isAuth = User.Identity.IsAuthenticated;
-            var name = User.Identity.Name;
-
             string userMail = User.FindFirst(ClaimTypes.Name)?.Value;
 
             if (_context.Accounts.FirstOrDefault(p => p.Email == userMail) == null)

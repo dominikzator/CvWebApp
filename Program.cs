@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Authorization;
+﻿using CvWebApp.Context;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
+
+builder.Services.AddDbContext<MainDBContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
@@ -31,6 +34,17 @@ app.Use(async (context, next) =>
 
         var identity = new ClaimsIdentity(claims, "AzureAppService");
         context.User = new ClaimsPrincipal(identity);
+    }
+    else
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, "localhost")
+        };
+
+        var identity = new ClaimsIdentity(claims, "AzureAppService");
+        context.User = new ClaimsPrincipal(identity);
+        await Console.Out.WriteLineAsync("ELSE");
     }
 
     await next();

@@ -1,5 +1,8 @@
+using CvWebApp.Context;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System;
+using System.Security.Claims;
 
 namespace CvWebApp.Pages
 {
@@ -7,38 +10,32 @@ namespace CvWebApp.Pages
     {
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<IndexModel> _logger;
+        private readonly MainDBContext _context;
 
         public bool IsDev => _env.IsDevelopment();
         public string EnvName => _env.EnvironmentName;
 
-        public IndexModel(IWebHostEnvironment env, ILogger<IndexModel> logger)
+        public IndexModel(MainDBContext context, IWebHostEnvironment env, ILogger<IndexModel> logger)
         {
+            _context = context;
             _env = env;
             _logger = logger;
         }
 
-        public void OnGet()
+        public async Task OnGet()
         {
             var isAuth = User.Identity.IsAuthenticated;
             var name = User.Identity.Name;
 
-            // Logi do Azure Log Stream
-            Console.WriteLine($"IsAuthenticated: {isAuth}");
-            Console.WriteLine($"Name: {name}");
-            Console.WriteLine($"Claims count: {User.Claims.Count()}");
+            string userMail = User.FindFirst(ClaimTypes.Name)?.Value;
 
-            foreach (var claim in User.Claims)
+            if (_context.Accounts.FirstOrDefault(p => p.Email == userMail) == null)
             {
-                Console.WriteLine($"Claim: {claim.Type} = {claim.Value}");
-            }
-
-            if (_env.IsDevelopment())
-            {
-                Console.WriteLine("Environment: Development");
-            }
-            else if (_env.IsProduction())
-            {
-                Console.WriteLine("Environment: Production");
+                _context.Accounts.Add(new Models.Account()
+                {
+                    Email = userMail
+                });
+                await _context.SaveChangesAsync();
             }
         }
 

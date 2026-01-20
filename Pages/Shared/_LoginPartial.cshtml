@@ -10,17 +10,8 @@
         </span>
     </li>
     <li class="nav-item mx-1">
-        @if (Env.IsDevelopment())
-        {
-            <span class="navbar-text align-items-center">
-                Logged In as: <strong>localhost</strong>
-            </span>
-        }
-        else if (User.Identity.IsAuthenticated)
-        {
-            <span class="navbar-text align-items-center">
-                Logged In as: <strong>@User.FindFirst(ClaimTypes.Name)?.Value</strong>
-            </span>
-        }
+        <span class="navbar-text align-items-center">
+            Logged In as: <strong>@User.FindFirst(ClaimTypes.Name)?.Value</strong>
+        </span>
     </li>
 </ul>

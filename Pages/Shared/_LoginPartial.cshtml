@@ -19,7 +19,7 @@
         else if (User.Identity.IsAuthenticated)
         {
             <span class="navbar-text align-items-center">
-                Logged In as: <strong>@User.FindFirst(ClaimTypes.Name)?.Value)</strong>
+                Logged In as: <strong>@User.FindFirst(ClaimTypes.Name)?.Value</strong>
             </span>
         }
     </li>

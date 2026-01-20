@@ -1,16 +1,25 @@
 ﻿@using System.Security.Principal
+@inject IWebHostEnvironment Env
 
 <ul class="navbar-nav">
-    @if (User.Identity.IsAuthenticated)
-    {
-        <span class="navbar-text me-3">
-            Witaj, @User.FindFirst("preferred_username")?.Value!
+    <!-- ENV + LOGIN INFO -->
+    <li class="nav-item mx-1">
+        <span class="navbar-text align-items-center">
+            Env: <strong>@Env.EnvironmentName</strong>
         </span>
-    }
-else
-{
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignIn">Sign in</a>
-        </li>
-}
+    </li>
+    <li class="nav-item mx-1">
+        @if (Env.IsDevelopment())
+        {
+            <span class="navbar-text align-items-center">
+                Logged In as: <strong>localhost</strong>
+            </span>
+        }
+        else if (User.Identity.IsAuthenticated)
+        {
+            <span class="navbar-text align-items-center">
+                Logged In as: <strong>@User.FindFirst("preferred_username")?.Value</strong>
+            </span>
+        }
+    </li>
 </ul>

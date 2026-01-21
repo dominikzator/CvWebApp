@@ -44,7 +44,6 @@ app.Use(async (context, next) =>
 
         var identity = new ClaimsIdentity(claims, "AzureAppService");
         context.User = new ClaimsPrincipal(identity);
-        await Console.Out.WriteLineAsync("ELSE");
     }
 
     await next();

@@ -8,20 +8,11 @@
 <div class="text-center">
     <h1 class="display-4">This is my CV Web App!</h1>
 
-    @if (User.Identity.IsAuthenticated)
-    {
-        <div>
-            Zalogowany ID: @User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            Name: @User.FindFirst(ClaimTypes.Name)?.Value
-            Provider: @User.FindFirst("idp")?.Value
-        </div>
-    }
-    else
-    {
-        <div class="alert alert-warning mt-4">
-            Zaloguj się, by zobaczyć CV!
-        </div>
-    }
+    <div>
+        Zalogowany ID: @User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+        Name: @User.FindFirst(ClaimTypes.Name)?.Value
+        Provider: @User.FindFirst("idp")?.Value
+    </div>
 
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">ASP.NET Core</a>.</p>
 </div>

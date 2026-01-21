@@ -7,6 +7,8 @@ namespace CvWebApp.Context
     {
         public DbSet<Account> Accounts { get; set; }
 
+        public DbSet<Note> Notes { get; set; }
+
         public MainDBContext() { }
 
         public MainDBContext(DbContextOptions<MainDBContext> options) : base(options) { }
@@ -15,5 +17,24 @@ namespace CvWebApp.Context
         {
             optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"));
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Account>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd();
+            });
+            modelBuilder.Entity<Note>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd();
+            });
+        }
+
     }
 }

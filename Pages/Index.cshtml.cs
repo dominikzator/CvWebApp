@@ -2,7 +2,7 @@
 using CvWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace CvWebApp.Pages
@@ -16,18 +16,14 @@ namespace CvWebApp.Pages
         public bool IsDev => _env.IsDevelopment();
         public string EnvName => _env.EnvironmentName;
 
-        [BindProperty]  // ← MUSI BYĆ!
-        public Note NewNote { get; set; } = new();
+        [BindProperty] public Note NewNote { get; set; } = new();
+        [BindProperty] public List<NoteView> NoteViews { get; set; } = new();
+        [BindProperty] public List<Note> UserNotes { get; set; } = new();
 
-        [TempData]
-        public string Message { get; set; }
-
-        [TempData]
-        public MessageType MessageType { get; set; }
+        [TempData] public string Message { get; set; }
+        [TempData] public MessageType MessageType { get; set; }
 
         public string UserMail { get; set; }
-
-        public List<Note> UserNotes { get; set; } = new();
 
         public IndexModel(MainDBContext context, IWebHostEnvironment env, ILogger<IndexModel> logger)
         {
@@ -38,8 +34,7 @@ namespace CvWebApp.Pages
 
         public async Task OnGet()
         {
-            UserMail = User.FindFirst(ClaimTypes.Name)?.Value;
-            UserNotes = _context.Notes.Where(p => p.Owner == UserMail).ToList();
+            await InitializeData();
 
             if (_context.Accounts.FirstOrDefault(p => p.Email == UserMail) == null)
             {
@@ -52,27 +47,14 @@ namespace CvWebApp.Pages
         }
         public async Task<IActionResult> OnPostCreateAsync()  // ← OnPostCreateAsync!
         {
-            Console.WriteLine("OnPostCreateAsync");
-
             try
             {
                 NewNote.CreatedTime = DateTime.UtcNow;
                 NewNote.UpdatedTime = DateTime.UtcNow;
                 NewNote.Owner = User.FindFirst(ClaimTypes.Name)?.Value!;
 
-                await Console.Out.WriteLineAsync("Trying to Add...");
-
-                await Console.Out.WriteLineAsync("NewNote.Id: " + NewNote.Id);
-                await Console.Out.WriteLineAsync("NewNote.Title: " + NewNote.Title);
-                await Console.Out.WriteLineAsync("NewNote.Description: " + NewNote.Description);
-                await Console.Out.WriteLineAsync("NewNote.Owner: " + NewNote.Owner);
-                await Console.Out.WriteLineAsync("NewNote.CreatedTime: " + NewNote.CreatedTime);
-                await Console.Out.WriteLineAsync("NewNote.UpdatedTime: " + NewNote.UpdatedTime);
-
                 _context.Notes.Add(NewNote);
                 await _context.SaveChangesAsync();
-
-                await Console.Out.WriteLineAsync("Added");
 
                 Message = $"Dodano: {NewNote.Title}";
                 MessageType = MessageType.AddSucceeded;
@@ -84,6 +66,38 @@ namespace CvWebApp.Pages
                 await Console.Out.WriteLineAsync("ex.Message: " + ex.Message);
                 await Console.Out.WriteLineAsync("ex.InnerException.Message: " + ex.InnerException.Message);
             }
+
+            return RedirectToPage();
+        }
+        public async Task<IActionResult> OnPostEditAsync(int id)
+        {
+            await InitializeData();
+
+            var noteView = NoteViews.FirstOrDefault(p => p.Id == id);
+
+            noteView!.IsEditing = true;
+            NewNote = await _context.Notes.FirstOrDefaultAsync(p => p.Id == noteView.Id);
+
+            return Page();
+        }
+        public async Task<IActionResult> OnPostEditSaveAsync(int id)
+        {
+            await InitializeData();
+
+            var entity = UserNotes.FirstOrDefault(n => n.Id == id);
+            if (entity == null)
+            {
+                return RedirectToPage();
+            }
+
+            entity.Title = NewNote.Title;
+            entity.Description = NewNote.Description;
+            entity.UpdatedTime = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            Message = "Notatka została pomyślnie zaktualizowana.";
+            MessageType = MessageType.EditSucceeded;
 
             return RedirectToPage();
         }
@@ -100,6 +114,21 @@ namespace CvWebApp.Pages
             }
 
             return RedirectToPage();
+        }
+
+        private async Task InitializeData()
+        {
+            UserMail = User.FindFirst(ClaimTypes.Name)?.Value!;
+            var userNotes = await _context.Notes.Where(p => p.Owner == UserMail).ToListAsync();
+            UserNotes = userNotes;
+            NoteViews = UserNotes.Select(p => new NoteView
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Description = p.Description,
+                UpdateTime = p.UpdatedTime,
+                IsEditing = false
+            }).ToList();
         }
     }
 }

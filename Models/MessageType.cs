@@ -3,6 +3,7 @@
     public enum MessageType
     {
         AddSucceeded,
-        DeleteSucceeded
+        DeleteSucceeded,
+        EditSucceeded
     }
 }

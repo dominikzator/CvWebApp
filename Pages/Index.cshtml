@@ -59,34 +59,65 @@
 
 <h3 class="mt-4 mb-3">Twoje notatki</h3>
 
-@if (Model.UserNotes == null || !Model.UserNotes.Any())
-{
-    <p>Brak notatek w bazie.</p>
-}
-else
-{
-    <div class="row row-cols-1 row-cols-md-3 g-3">
-        @foreach (var note in Model.UserNotes)
-        {
-            <div class="col d-flex">
-                <div class="card flex-fill shadow-sm">
-                    <div class="card-body">
+<div class="row row-cols-1 row-cols-md-3 g-3">
+    @for (var i = 0; i < Model.NoteViews.Count; i++)
+    {
+        var note = Model.NoteViews[i];
+
+        <div class="col d-flex">
+            <div class="card flex-fill shadow-sm">
+                <div class="card-body">
+
+                    @if (@note.IsEditing)
+                    {
+                        <!-- TRYB EDYCJI: TextBoxy zamiast tekstu -->
+                        <form method="post">
+                            <input type="hidden" asp-for="NewNote.Id"  />
+
+                            <div class="mb-2">
+                                <input class="form-control"
+                                       asp-for=NewNote.Title />
+                            </div>
+
+                            <div class="mb-2">
+                                <textarea class="form-control" rows="3"
+                                          asp-for="NewNote.Description"></textarea>
+                            </div>
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-success d-flex align-items-center justify-content-center px-3"
+                                    asp-page-handler="EditSave"
+                                    asp-route-id="@note.Id">
+                                Zapisz
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <!-- TWÓJ DOTYCHCZASOWY WIDOK -->
                         <h5 class="card-title">@note.Title</h5>
                         <p class="card-text text-muted">
                             @note.Description
                         </p>
-                    </div>
-                    <div class="card-footer small text-muted">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <span>@note.Owner</span><br />
-                                <span>@note.CreatedTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</span>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <a asp-page="/EditNote" asp-route-id="@note.Id"
-                                   class="btn btn-sm btn-primary d-flex align-items-center justify-content-center px-3">
-                                    Edytuj
-                                </a>
+                    }
+
+                </div>
+                <div class="card-footer small text-muted">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span>@note.UpdateTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            @if (!note.IsEditing)
+                            {
+                                <!-- Edytuj przełącza w tryb inline-edita -->
+                                <form method="post" asp-page-handler="Edit" asp-route-id="@note.Id" class="d-inline">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-primary d-flex align-items-center justify-content-center px-3">
+                                        Edytuj
+                                    </button>
+                                </form>
 
                                 <form method="post" asp-page-handler="Delete" asp-route-id="@note.Id" class="d-inline">
                                     <button type="submit"
@@ -95,15 +126,19 @@ else
                                         Usuń
                                     </button>
                                 </form>
-                            </div>
-
+                            }
+                            else
+                            {
+                                <!-- W trybie edycji przycisk Zapisz jest przy polach, więc tu nic -->
+                            }
                         </div>
+
                     </div>
                 </div>
             </div>
-        }
-    </div>
-}
+        </div>
+    }
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

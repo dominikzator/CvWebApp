@@ -19,7 +19,11 @@ namespace CvWebApp.Pages
         [BindProperty]  // ← MUSI BYĆ!
         public Note NewNote { get; set; } = new();
 
-        public string? Message { get; set; }
+        [TempData]
+        public string Message { get; set; }
+
+        [TempData]
+        public MessageType MessageType { get; set; }
 
         public string UserMail { get; set; }
 
@@ -71,6 +75,7 @@ namespace CvWebApp.Pages
                 await Console.Out.WriteLineAsync("Added");
 
                 Message = $"Dodano: {NewNote.Title}";
+                MessageType = MessageType.AddSucceeded;
                 ModelState.Clear();
                 NewNote = new Note();
             }
@@ -80,7 +85,7 @@ namespace CvWebApp.Pages
                 await Console.Out.WriteLineAsync("ex.InnerException.Message: " + ex.InnerException.Message);
             }
 
-            return Page();
+            return RedirectToPage();
         }
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
@@ -89,6 +94,9 @@ namespace CvWebApp.Pages
             {
                 _context.Notes.Remove(note);
                 await _context.SaveChangesAsync();
+
+                Message = $"Usunięto notatkę: {note.Title}";
+                MessageType = MessageType.DeleteSucceeded;
             }
 
             return RedirectToPage();

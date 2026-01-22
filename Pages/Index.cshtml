@@ -1,56 +1,59 @@
 ﻿@page
 @using System.Security.Claims
+@using CvWebApp.Models
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">This is my CV Web App!</h1>
+<button class="btn btn-success mb-3"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#addNoteForm"
+        aria-expanded="false"
+        aria-controls="addNoteForm">
+    + Dodaj nową notatkę
+</button>
 
-    <div class="mb-4">
-        Zalogowany ID: @User.FindFirst(ClaimTypes.NameIdentifier)?.Value<br />
-        Name: @User.FindFirst(ClaimTypes.Name)?.Value<br />
-        Provider: @User.FindFirst("idp")?.Value
-    </div>
-
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">ASP.NET Core</a>.</p>
-</div>
-
-<!-- NOWY FORMULARZ DODAJ NOTATKĘ -->
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="fas fa-plus"></i> Dodaj nową notatkę</h4>
-                </div>
-                <div class="card-body">
-                    <form method="post" asp-page-handler="Create">
-                        <div class="mb-3">
-                            <label asp-for="NewNote.Title" class="form-label">Tytuł</label>
-                            <input asp-for="NewNote.Title" class="form-control" placeholder="Wpisz tytuł..." />
-                            <span asp-validation-for="NewNote.Title" class="text-danger"></span>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label asp-for="NewNote.Description" class="form-label">Opis</label>
-                            <textarea asp-for="NewNote.Description" class="form-control" rows="3" placeholder="Wpisz opis..."></textarea>
-                            <span asp-validation-for="NewNote.Description" class="text-danger"></span>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Zapisz notatkę
-                        </button>
-                        <a href="#" class="btn btn-secondary ms-2" onclick="document.querySelector('form').reset(); return false;">
-                            Wyczyść
-                        </a>
-                    </form>
-                </div>
+<div class="collapse" id="addNoteForm">
+    <div class="card card-body mb-4">
+        <form method="post" asp-page-handler="Create">
+            <div class="mb-3">
+                <label asp-for="NewNote.Title" class="form-label">Tytuł</label>
+                <input asp-for="NewNote.Title" class="form-control" placeholder="Wpisz tytuł..." />
+                <span asp-validation-for="NewNote.Title" class="text-danger"></span>
             </div>
-        </div>
+
+            <div class="mb-3">
+                <label asp-for="NewNote.Description" class="form-label">Opis</label>
+                <textarea asp-for="NewNote.Description" class="form-control" rows="3" placeholder="Wpisz opis..."></textarea>
+                <span asp-validation-for="NewNote.Description" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary me-2">
+                Zapisz notatkę
+            </button>
+            <button type="reset" class="btn btn-secondary">
+                Wyczyść
+            </button>
+        </form>
     </div>
 </div>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    var alertClass = Model.MessageType switch
+    {
+        MessageType.AddSucceeded => "alert-success",
+        MessageType.DeleteSucceeded => "alert-danger",
+        _ => "alert-info"
+    };
+
+    <div class="alert @alertClass alert-dismissible fade show mt-3" role="alert">
+        @Model.Message
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
 
 <hr />
 
@@ -99,14 +102,6 @@ else
                 </div>
             </div>
         }
-    </div>
-}
-
-@if (!string.IsNullOrEmpty(Model.Message))
-{
-    <div class="alert alert-success alert-dismissible fade show mt-3 mx-auto" style="max-width: 600px;" role="alert">
-        @Model.Message
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
 

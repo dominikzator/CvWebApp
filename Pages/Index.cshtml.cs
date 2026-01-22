@@ -23,6 +23,8 @@ namespace CvWebApp.Pages
 
         public string UserMail { get; set; }
 
+        public List<Note> UserNotes { get; set; } = new();
+
         public IndexModel(MainDBContext context, IWebHostEnvironment env, ILogger<IndexModel> logger)
         {
             _context = context;
@@ -33,6 +35,7 @@ namespace CvWebApp.Pages
         public async Task OnGet()
         {
             UserMail = User.FindFirst(ClaimTypes.Name)?.Value;
+            UserNotes = _context.Notes.Where(p => p.Owner == UserMail).ToList();
 
             if (_context.Accounts.FirstOrDefault(p => p.Email == UserMail) == null)
             {
@@ -68,7 +71,8 @@ namespace CvWebApp.Pages
                 await Console.Out.WriteLineAsync("Added");
 
                 Message = $"Dodano: {NewNote.Title}";
-                NewNote = new Note();  // Reset formularza
+                ModelState.Clear();
+                NewNote = new Note();
             }
             catch (Exception ex)
             {
@@ -76,9 +80,18 @@ namespace CvWebApp.Pages
                 await Console.Out.WriteLineAsync("ex.InnerException.Message: " + ex.InnerException.Message);
             }
 
-
-
             return Page();
+        }
+        public async Task<IActionResult> OnPostDeleteAsync(int id)
+        {
+            var note = await _context.Notes.FindAsync(id);
+            if (note != null)
+            {
+                _context.Notes.Remove(note);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToPage();
         }
     }
 }

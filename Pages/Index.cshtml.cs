@@ -1,4 +1,6 @@
-﻿using CvWebApp.Context;
+﻿using Azure;
+using Azure.Communication.Email;
+using CvWebApp.Context;
 using CvWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -116,6 +118,64 @@ namespace CvWebApp.Pages
             return RedirectToPage();
         }
 
+        public async Task<IActionResult> OnPostSendMailAsync(int id)
+        {
+            await Console.Out.WriteLineAsync("Sending Mail...");
+
+            await InitializeData();
+
+            string connectionString = Environment.GetEnvironmentVariable("CommunicationServicesConnectionString");
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                return new BadRequestObjectResult("Brak CommunicationServicesConnectionString");
+            }
+
+            var note = await _context.Notes.FindAsync(id);
+
+
+            var data = new EmailData
+            {
+                To = UserMail,
+                Subject = note.Title + " Note Reminder",
+                Message = $"This is a Message about your note! \n Title: {note.Title} \n Description: {note.Description}"
+            };
+
+            var emailContent = new EmailContent(data.Subject)
+            {
+                PlainText = data.Message
+            };
+
+            var emailRecipients = new EmailRecipients(new List<EmailAddress> { new(data.To) });
+
+            var emailMessage = new EmailMessage(
+                senderAddress: data.From,  // np. "donotreply@twojadomena.azurecomm.net"
+                recipients: emailRecipients,
+                content: emailContent);
+
+            try
+            {
+                var emailClient = new EmailClient(connectionString);
+                var operation = await emailClient.SendAsync(WaitUntil.Started, emailMessage);
+                // Polling na status
+                do
+                {
+                    await Task.Delay(500);
+                    await operation.UpdateStatusAsync();
+                } while (!operation.HasCompleted);
+
+                string status = operation.HasValue ? operation.Value.Status.ToString() : "Unknown";
+                return new OkObjectResult($"Mail wysłany! Operation ID: {operation.Id}, Status: {status}");
+            }
+            catch (Exception ex)
+            {
+                await Console.Out.WriteLineAsync("ex.Message: " + ex.Message);
+
+                return new StatusCodeResult(500);
+            }
+
+            return RedirectToPage();
+        }
+
         private async Task InitializeData()
         {
             UserMail = User.FindFirst(ClaimTypes.Name)?.Value!;
@@ -131,4 +191,12 @@ namespace CvWebApp.Pages
             }).ToList();
         }
     }
+}
+
+public class EmailData
+{
+    public string To { get; set; }
+    public string From { get; set; } = "donotreply@8044aea5-4316-4b2f-849c-7afa34f35f40.azurecomm.net";
+    public string Subject { get; set; }
+    public string Message { get; set; }
 }

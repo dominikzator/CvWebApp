@@ -46,7 +46,7 @@
     {
         MessageType.AddSucceeded => "alert-success",
         MessageType.DeleteSucceeded => "alert-danger",
-        _ => "alert-info"
+        MessageType.EmailSent => "alert-info"
     };
 
     <div class="alert @alertClass alert-dismissible fade show mt-3" role="alert">

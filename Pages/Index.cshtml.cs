@@ -163,8 +163,8 @@ namespace CvWebApp.Pages
                     await operation.UpdateStatusAsync();
                 } while (!operation.HasCompleted);
 
-                string status = operation.HasValue ? operation.Value.Status.ToString() : "Unknown";
-                return new OkObjectResult($"Mail wysłany! Operation ID: {operation.Id}, Status: {status}");
+                Message = "Email z notatką został pomyślnie wysłany.";
+                MessageType = MessageType.EmailSent;
             }
             catch (Exception ex)
             {

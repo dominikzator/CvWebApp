@@ -4,6 +4,7 @@
     {
         AddSucceeded,
         DeleteSucceeded,
-        EditSucceeded
+        EditSucceeded,
+        EmailSent
     }
 }
